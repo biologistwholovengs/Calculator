@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор с карточками</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2c2c2c; /* Темный серый фон */
+            margin: 0;
+            color: #f4f4f4; /* Светлый текст */
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .calculator {
+            background-color: #3a3a3a; /* Темно-серый фон калькулятора */
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5); /* Глубокая тень */
+            width: 600px; /* Ширина калькулятора */
+        }
+        .display {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .row {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .card {
+            background-color: #4a4a4a; /* Темно-серый фон карточек */
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 18px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Более объемная тень */
+            color: #f4f4f4; /* Светлый текст */
+            cursor: pointer; /* Курсор в виде указателя */
+            transition: background-color 0.3s;
+            position: relative; /* Для позиционирования крестика */
+        }
+        .card:hover {
+            background-color: #5a5a5a; /* Светлее при наведении */
+        }
+        .card.number {
+            width: auto; /* Автоматическая ширина для чисел */
+        }
+        .card.operator {
+            width: 30px; /* Уже фиксированная ширина для операторов */
+            background-color: transparent; /* Прозрачный фон */
+            color: #f4f4f4; /* Видимый текст */
+            padding: 8px; /* Уменьшенный padding */
+            box-shadow: none; /* Убираем тень */
+        }
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .buttons button {
+            padding: 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background-color: #5a5a5a; /* Темно-серый фон кнопок */
+            color: #f4f4f4; /* Светлый текст */
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Более объемная тень */
+            flex: 1;
+        }
+        .buttons button:hover {
+            background-color: #6a6a6a; /* Светлее при наведении */
+        }
+        .buttons button.operator {
+            background-color: #ff9500; /* Оранжевый для операторов */
+            color: white;
+        }
+        .buttons button.operator:hover {
+            background-color: #e08900; /* Темнее при наведении */
+        }
+        .buttons button.equal {
+            background-color: #34c759; /* Зеленый для кнопки "=" */
+            color: white;
+        }
+        .buttons button.equal:hover {
+            background-color: #2da94f; /* Темнее при наведении */
+        }
+        .drop-container {
+            background-color: #3a3a3a; /* Темно-серый фон */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5); /* Глубокая тень */
+            width: 200px; /* Ширина контейнера */
+            height: 100%; /* Высота контейнера */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            overflow-y: auto; /* Прокрутка, если карточек много */
+        }
+        .drop-container .card {
+            cursor: grab; /* Курсор в виде руки для перетаскивания */
+            padding-right: 25px; /* Место для крестика */
+        }
+        .delete-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: none;
+            border: none;
+            color: #ff4d4d; /* Красный цвет крестика */
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            color: #ff1a1a; /* Темнее красный при наведении */
+        }
+        .comment-input {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #5a5a5a;
+            background-color: #4a4a4a;
+            color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Калькулятор -->
+    <div class="calculator">
+        <!-- Дисплей для истории и текущего выражения -->
+        <div class="display" id="display">
+            <!-- Здесь будут появляться ряды с карточками -->
+        </div>
+
+        <!-- Кнопки калькулятора -->
+        <div class="buttons">
+            <!-- Ряд с цифрами от 0 до 9 -->
+            <div class="row">
+                <button onclick="appendNumber(0)">0</button>
+                <button onclick="appendNumber(1)">1</button>
+                <button onclick="appendNumber(2)">2</button>
+                <button onclick="appendNumber(3)">3</button>
+                <button onclick="appendNumber(4)">4</button>
+                <button onclick="appendNumber(5)">5</button>
+                <button onclick="appendNumber(6)">6</button>
+                <button onclick="appendNumber(7)">7</button>
+                <button onclick="appendNumber(8)">8</button>
+                <button onclick="appendNumber(9)">9</button>
+            </div>
+
+            <!-- Ряд с операторами и специальными кнопками -->
+            <div class="row">
+                <button onclick="clearDisplay()">C</button>
+                <button onclick="deleteLast()">←</button>
+                <button class="operator" onclick="appendOperator('+')">+</button>
+                <button class="operator" onclick="appendOperator('-')">-</button>
+                <button class="operator" onclick="appendOperator('*')">*</button>
+                <button class="operator" onclick="appendOperator('/')">/</button>
+                <button class="operator" onclick="appendOperator('%')">%</button>
+                <button class="operator" onclick="appendOperator('()')">()</button>
+                <button class="equal" onclick="calculate()">=</button>
+                <button onclick="appendNumber('.')">.</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер для перетаскивания карточек -->
+    <div class="drop-container" id="dropContainer">
+        <!-- Сюда будут перетаскиваться карточки -->
+    </div>
+</div>
+
+<script>
+    let display = document.getElementById('display');
+    let dropContainer = document.getElementById('dropContainer');
+    let currentExpression = '';
+    let isNewExpression = false;
+    let lastBracket = '('; // Для отслеживания типа скобки
+
+    // Обработчик ввода с клавиатуры
+    document.addEventListener('keydown', (e) => {
+        const key = e.key;
+
+        // Цифры
+        if (/[0-9]/.test(key)) {
+            appendNumber(key);
+        }
+        // Операторы
+        else if (['+', '-', '*', '/', '%'].includes(key)) {
+            appendOperator(key);
+        }
+        // Скобки
+        else if (key === '(' || key === ')') {
+            appendOperator(key);
+        }
+        // Точка
+        else if (key === '.') {
+            appendNumber('.');
+        }
+        // Enter (вычисление)
+        else if (key === 'Enter') {
+            e.preventDefault(); // Предотвращаем действие по умолчанию
+            calculate();
+        }
+        // Backspace (удаление последнего символа)
+        else if (key === 'Backspace') {
+            deleteLast();
+        }
+        // Escape (очистка)
+        else if (key === 'Escape') {
+            clearDisplay();
+        }
+    });
+
+    // Обработчик вставки из буфера обмена
+    document.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        if (/^[0-9.]+$/.test(pastedText)) {
+            appendNumber(pastedText);
+        }
+    });
+
+    function appendNumber(number) {
+        if (isNewExpression) {
+            moveCurrentToHistory();
+            isNewExpression = false;
+        }
+        currentExpression += number;
+        updateCurrentDisplay();
+    }
+
+    function appendOperator(operator) {
+        if (isNewExpression) {
+            moveCurrentToHistory();
+            isNewExpression = false;
+        }
+        if (operator === '()') {
+            // Автоматически выбираем тип скобки
+            currentExpression += lastBracket;
+            lastBracket = lastBracket === '(' ? ')' : '(';
+        } else {
+            currentExpression += operator;
+        }
+        updateCurrentDisplay();
+    }
+
+    function clearDisplay() {
+        currentExpression = '';
+        display.innerHTML = '';
+    }
+
+    function deleteLast() {
+        currentExpression = currentExpression.slice(0, -1);
+        updateCurrentDisplay();
+    }
+
+    function calculate() {
+        try {
+            // Проверка на сбалансированность скобок
+            if (!areParenthesesBalanced(currentExpression)) {
+                return; // Не выводим результат, если скобки несбалансированы
+            }
+            let result = eval(currentExpression.replace(/%/g, '/100*'));
+            addToHistory(currentExpression + '=' + result);
+            currentExpression = '';
+            updateCurrentDisplay();
+            isNewExpression = true;
+        } catch (e) {
+            // Не выводим ошибку, просто ничего не делаем
+        }
+    }
+
+    function updateCurrentDisplay() {
+        let currentRow = display.lastElementChild;
+        if (!currentRow || isNewExpression) {
+            currentRow = document.createElement('div');
+            currentRow.className = 'row';
+            display.appendChild(currentRow);
+        }
+        currentRow.innerHTML = '';
+        let tokens = tokenizeExpression(currentExpression);
+        for (let token of tokens) {
+            addCard(currentRow, token);
+        }
+        // Автоматическая прокрутка вниз
+        display.scrollTop = display.scrollHeight;
+    }
+
+    function moveCurrentToHistory() {
+        if (currentExpression !== '') {
+            addToHistory(currentExpression);
+            currentExpression = '';
+            updateCurrentDisplay();
+        }
+    }
+
+    function addToHistory(content) {
+        let historyRow = document.createElement('div');
+        historyRow.className = 'row';
+        let tokens = tokenizeExpression(content);
+        for (let token of tokens) {
+            addCard(historyRow, token);
+        }
+        // Добавляем историю выше текущего выражения
+        display.insertBefore(historyRow, display.lastElementChild);
+        // Автоматическая прокрутка вниз
+        display.scrollTop = display.scrollHeight;
+    }
+
+    function addCard(container, content) {
+        let card = document.createElement('div');
+        card.className = 'card';
+        if (!isNaN(content) || content === '.') {
+            card.classList.add('number');
+        } else {
+            card.classList.add('operator');
+        }
+        card.textContent = content;
+
+        // Добавляем обработчик клика на карточку
+        card.addEventListener('click', () => {
+            if (content === '=') {
+                calculate(); // Если это "=", вызываем calculate
+            } else if (!isNaN(content) || content === '.') {
+                appendNumber(content); // Если это число или точка
+            } else {
+                appendOperator(content); // Если это оператор
+            }
+        });
+
+        // Добавляем возможность перетаскивания для карточек с числами
+        if (!isNaN(content) || content === '.') {
+            card.draggable = true;
+            card.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', content);
+            });
+        }
+
+        container.appendChild(card);
+    }
+
+    function tokenizeExpression(expression) {
+        let tokens = [];
+        let currentNumber = '';
+        for (let char of expression) {
+            if (!isNaN(char) || char === '.') {
+                currentNumber += char;
+            } else {
+                if (currentNumber !== '') {
+                    tokens.push(currentNumber);
+                    currentNumber = '';
+                }
+                tokens.push(char);
+            }
+        }
+        if (currentNumber !== '') {
+            tokens.push(currentNumber);
+        }
+        return tokens;
+    }
+
+    function areParenthesesBalanced(expression) {
+        let stack = [];
+        for (let char of expression) {
+            if (char === '(') {
+                stack.push(char);
+            } else if (char === ')') {
+                if (stack.length === 0) {
+                    return false; // Закрывающая скобка без открывающей
+                }
+                stack.pop();
+            }
+        }
+        return stack.length === 0; // Все скобки должны быть сбалансированы
+    }
+
+    // Обработчик для перетаскивания карточек в контейнер
+    dropContainer.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Разрешаем перетаскивание
+    });
+
+    dropContainer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const data = e.dataTransfer.getData('text/plain');
+        if (!isNaN(data) || data === '.') {
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'card-container';
+
+            const card = document.createElement('div');
+            card.className = 'card number';
+            card.textContent = data;
+
+            // Добавляем крестик для удаления
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = '×';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Останавливаем всплытие события
+                cardContainer.remove(); // Удаляем карточку и комментарий
+            });
+
+            // Добавляем поле для комментария
+            const commentInput = document.createElement('input');
+            commentInput.className = 'comment-input';
+            commentInput.placeholder = 'Комментарий';
+
+            // Добавляем обработчик клика для карточки
+            card.addEventListener('click', () => {
+                appendNumber(data); // Добавляем число в выражение
+            });
+
+            card.appendChild(deleteBtn);
+            cardContainer.appendChild(card);
+            cardContainer.appendChild(commentInput);
+            dropContainer.appendChild(cardContainer);
+        }
+    });
+
+    // Обработчик правой кнопки мыши для вставки скобок
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault(); // Отключаем стандартное меню
+        appendOperator('()'); // Вставляем скобку
+    });
+</script>
+
+</body>
+</html>
