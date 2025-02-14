@@ -8,19 +8,32 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            background-color: #2c2c2c;
+            color: #f4f4f4;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #2c2c2c;
-            margin: 0;
-            color: #f4f4f4;
+        }
+
+        .outer-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .container {
             display: flex;
             gap: 20px;
             align-items: flex-start;
+            width: 100%;
+            max-width: 1000px;
         }
 
         .calculator {
@@ -28,7 +41,8 @@
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-            width: 600px;
+            flex: 1;
+            min-width: 300px;
         }
 
         .display {
@@ -57,6 +71,9 @@
             cursor: pointer;
             transition: background-color 0.3s;
             position: relative;
+            display: inline-block;
+            /* Ensure proper flexbox behavior */
+            box-sizing: border-box;
         }
 
         .card:hover {
@@ -73,6 +90,8 @@
             color: #f4f4f4;
             padding: 8px;
             box-shadow: none;
+            white-space: nowrap;
+            /* Prevent wrapping */
         }
 
         .buttons {
@@ -82,8 +101,8 @@
         }
 
         .buttons button {
-            padding: 20px;
-            font-size: 18px;
+            padding: 15px;
+            font-size: 16px;
             border: none;
             border-radius: 10px;
             background-color: #5a5a5a;
@@ -120,39 +139,52 @@
             width: 100%;
         }
 
-
         .drop-container {
             background-color: #3a3a3a;
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-            width: 200px;
-            height: 100%;
+            width: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            align-items: center;
+            align-items: stretch;
+            /* stretch so the full container scales */
             overflow-y: auto;
         }
 
-        .drop-container .card {
-            cursor: grab;
-            padding-right: 25px;
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            /* Stack the items vertically */
+            align-items: stretch;
+            /* Make children stretch to container width */
+            margin: 0px;
+            padding: 0px;
+            gap: 0px;
         }
 
-        .delete-btn {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: none;
-            border: none;
-            color: #ff4d4d;
-            font-size: 14px;
-            cursor: pointer;
+        .card-container>*:first-child {
+            flex: none;
+            /* Don't let the number flex */
         }
 
-        .delete-btn:hover {
-            color: #ff1a1a;
+        .delete-card {
+            background-color: #3a3a3a;
+            font-size: 18px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            color: #f4f4f4;
+            transition: background-color 0.3s;
+            width: auto;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .number-card {
+            border-radius: 10px;
+            padding: 0px;
+            margin: 0px;
         }
 
         .comment-input {
@@ -185,58 +217,111 @@
             color: #f4f4f4;
             text-align: center;
         }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .calculator {
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .drop-container {
+                width: 100%;
+                max-width: 400px;
+                height: auto;
+            }
+        }
+
+        .digit-card-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 1px;
+            /* Reduced gap */
+            margin: 1px;
+            /* Reduced margin */
+        }
+
+        .digit-card {
+            background-color: #4a4a4a;
+            border-radius: 10px;
+            padding: 6px;
+            /* Reduced padding */
+            font-size: 16px;
+            /* Reduced font size */
+            text-align: center;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+            color: #f4f4f4;
+            transition: background-color 0.3s;
+            width: auto;
+        }
+
+        .card.number {
+            display: inline-block;
+            padding: 2px;
+            /* Reduce padding on number */
+        }
+
+        .digit-card:hover {
+            background-color: #5a5a5a;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <div class="calculator">
-            <div class="display" id="display">
-            </div>
-
-            <div class="vat-input-container">
-                <label for="vatRate">Ставка НДС (%):</label>
-                <input type="number" id="vatRate" class="vat-input" value="20" min="0" max="100">
-            </div>
-
-            <div class="buttons">
-                <div class="row">
-                    <button onclick="appendNumber(0)">0</button>
-                    <button onclick="appendNumber(1)">1</button>
-                    <button onclick="appendNumber(2)">2</button>
-                    <button onclick="appendNumber(3)">3</button>
-                    <button onclick="appendNumber(4)">4</button>
-                    <button onclick="appendNumber(5)">5</button>
-                    <button onclick="appendNumber(6)">6</button>
-                    <button onclick="appendNumber(7)">7</button>
-                    <button onclick="appendNumber(8)">8</button>
-                    <button onclick="appendNumber(9)">9</button>
+    <div class="outer-container">
+        <div class="container">
+            <div class="calculator">
+                <div class="display" id="display">
                 </div>
 
-                <!-- Кнопка "=" на всю ширину калькулятора -->
-                <button class="equal full-width" onclick="calculate()">=</button>
+                <div class="vat-input-container">
+                    <label for="vatRate">Ставка НДС (%):</label>
+                    <input type="number" id="vatRate" class="vat-input" value="20" min="0" max="100">
+                </div>
 
-                <div class="row">
-                    <button onclick="clearDisplay()">C</button>
-                    <button onclick="deleteLast()">←</button>
-                    <button class="operator" onclick="appendOperator('+')">+</button>
-                    <button class="operator" onclick="appendOperator('-')">-</button>
-                    <button class="operator" onclick="appendOperator('*')">*</button>
-                    <button class="operator" onclick="appendOperator('/')">/</button>
-                    <button class="operator" onclick="appendOperator('%')">%</button>
-                    <button class="operator" onclick="appendOperator('()')">()</button>
-                    <button onclick="appendNumber('.')">.</button>
-                    <button onclick="addVAT()">Начислить НДС</button>
-                    <button onclick="extractVAT()">Выделить НДС</button>
-                    <button onclick="calculateBaseByVAT()">Расчет базы по НДС</button>
-                    <button onclick="appendOperator('|')">|</button>
-                    <button onclick="calculateAverage()">Среднее</button>
+                <div class="buttons">
+                    <div class="row">
+                        <button onclick="appendNumber(0)">0</button>
+                        <button onclick="appendNumber(1)">1</button>
+                        <button onclick="appendNumber(2)">2</button>
+                        <button onclick="appendNumber(3)">3</button>
+                        <button onclick="appendNumber(4)">4</button>
+                        <button onclick="appendNumber(5)">5</button>
+                        <button onclick="appendNumber(6)">6</button>
+                        <button onclick="appendNumber(7)">7</button>
+                        <button onclick="appendNumber(8)">8</button>
+                        <button onclick="appendNumber(9)">9</button>
+                    </div>
+
+                    <!-- Кнопка "=" на всю ширину калькулятора -->
+                    <button class="equal full-width" onclick="calculate()">=</button>
+
+                    <div class="row">
+                        <button onclick="clearDisplay()">C</button>
+                        <button onclick="deleteLast()">←</button>
+                        <button class="operator" onclick="appendOperator('+')">+</button>
+                        <button class="operator" onclick="appendOperator('-')">-</button>
+                        <button class="operator" onclick="appendOperator('*')">*</button>
+                        <button class="operator" style="background-color: #ff9500;" onclick="appendOperator('/')">/</button>
+                        <button class="operator" onclick="appendOperator('%')">%</button>
+                        <button class="operator" onclick="appendOperator('()')">()</button>
+                        <button onclick="appendNumber('.')">.</button>
+                        <button onclick="addVAT()">Начислить НДС</button>
+                        <button onclick="extractVAT()">Выделить НДС</button>
+                        <button onclick="calculateBaseByVAT()">Расчет базы по НДС</button>
+                        <button onclick="appendOperator('|')">|</button>
+                        <button onclick="calculateAverage()">Среднее</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="drop-container" id="dropContainer">
+            <div class="drop-container" id="dropContainer">
+            </div>
         </div>
     </div>
 
@@ -247,7 +332,14 @@
         let isNewExpression = false;
         let lastBracket = '(';
 
-        // Load saved cards from localStorage
+        function formatNumber(number) {
+            return number.toLocaleString('ru-RU');
+        }
+
+        function parseNumber(numberString) {
+            return parseFloat(numberString.replace(/,/g, ''));
+        }
+
         function loadSavedCards() {
             const savedCards = localStorage.getItem('savedCards');
             if (savedCards) {
@@ -258,14 +350,13 @@
             }
         }
 
-        // Save cards to localStorage
         function saveCards() {
             const cards = Array.from(dropContainer.children);
             const cardData = cards.map(container => {
-                const card = container.querySelector('.card');
+                const card = container.querySelector('.number-card')
                 const comment = container.querySelector('.comment-input').value;
                 return {
-                    value: card.textContent.replace('×', ''), // Extract value without delete button
+                    value: card.dataset.numberValue || card.textContent.replace('×', ''),
                     comment: comment
                 };
             });
@@ -281,7 +372,7 @@
             } else if (key === '(' || key === ')') {
                 appendOperator(key);
             } else if (key === '.') {
-                appendNumber('.');
+                appendNumber(key);
             } else if (key === 'Enter') {
                 e.preventDefault();
                 calculate();
@@ -295,8 +386,9 @@
         document.addEventListener('paste', (e) => {
             e.preventDefault();
             const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-            if (/^[0-9.]+$/.test(pastedText)) {
-                appendNumber(pastedText);
+            const number = pastedText.replace(/,/g, '');
+            if (/^[0-9.]+$/.test(number)) {
+                appendNumber(number);
             }
         });
 
@@ -339,28 +431,25 @@
                     return;
                 }
 
-                const originalExpression = currentExpression; // Сохраняем исходное выражение
+                const originalExpression = currentExpression;
 
-                // Проверяем, есть ли операция с процентами
                 if (currentExpression.includes('%')) {
                     currentExpression = handlePercentage(currentExpression);
                 }
 
                 let result = eval(currentExpression);
-                addToHistory(originalExpression + '=' + result); // Используем исходное выражение в истории
+                addToHistory(originalExpression + '=' + result);
                 currentExpression = '';
                 updateCurrentDisplay();
                 isNewExpression = true;
             } catch (e) {
-                // Не выводим ошибку, просто ничего не делаем
+                // Do nothing
             }
         }
 
         function handlePercentage(expression) {
-            // Ищем выражение вида "число + число%" или "число - число%"
             const regex = /(\d+(\.\d*)?)\s*([+\-])\s*(\d+(\.\d*)?)%/g;
 
-            // Заменяем все найденные выражения с процентами на результат вычисления
             expression = expression.replace(regex, (match, num1, dec1, operator, num2, dec2) => {
                 const number = parseFloat(num1);
                 const percentage = parseFloat(num2);
@@ -372,7 +461,7 @@
                     return number - percentageValue;
                 }
 
-                return match; // Если оператор не + и не -, возвращаем исходное выражение
+                return match;
             });
 
             return expression;
@@ -388,7 +477,12 @@
             currentRow.innerHTML = '';
             let tokens = tokenizeExpression(currentExpression);
             for (let token of tokens) {
-                addCard(currentRow, token);
+                if (!isNaN(token) || token === '.') {
+                    let card = createNumberCard(token);
+                    currentRow.appendChild(card);
+                } else {
+                    addCard(currentRow, token);
+                }
             }
             display.scrollTop = display.scrollHeight;
         }
@@ -406,7 +500,12 @@
             historyRow.className = 'row';
             let tokens = tokenizeExpression(content);
             for (let token of tokens) {
-                addCard(historyRow, token);
+                if (!isNaN(token) || token === '.') {
+                    let card = createNumberCard(token);
+                    historyRow.appendChild(card);
+                } else {
+                    addCard(historyRow, token);
+                }
             }
             display.insertBefore(historyRow, display.lastElementChild);
             display.scrollTop = display.scrollHeight;
@@ -414,12 +513,7 @@
 
         function addCard(container, content) {
             let card = document.createElement('div');
-            card.className = 'card';
-            if (!isNaN(content) || content === '.') {
-                card.classList.add('number');
-            } else {
-                card.classList.add('operator');
-            }
+            card.className = 'card operator'; // Ensure consistent operator styling
             card.textContent = content;
 
             card.addEventListener('click', () => {
@@ -440,6 +534,33 @@
             }
 
             container.appendChild(card);
+        }
+
+        function createNumberCard(token) {
+            const card = document.createElement('div');
+            card.className = 'card number number-card';
+            card.style.margin = '0px'; // Reduce Spacing even more
+            card.draggable = true;
+            card.addEventListener('click', () => {
+                appendNumber(token);
+            });
+
+            card.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', token);
+            });
+
+            const formattedNumber = formatNumber(parseFloat(token));
+            const digitCardContainer = document.createElement('div');
+            digitCardContainer.className = 'digit-card-container';
+            for (const digit of formattedNumber) {
+                const digitCard = document.createElement('div');
+                digitCard.className = 'digit-card';
+                digitCard.textContent = digit;
+                digitCardContainer.appendChild(digitCard);
+            }
+            card.appendChild(digitCardContainer);
+
+            return card;
         }
 
         function tokenizeExpression(expression) {
@@ -480,33 +601,47 @@
         function createCard(data, commentText = '') {
             const cardContainer = document.createElement('div');
             cardContainer.className = 'card-container';
+            cardContainer.style.gap = '0px';
+            cardContainer.style.margin = '0px';
+            cardContainer.style.padding = '0px';
+            cardContainer.style.display = 'flex';
+            cardContainer.style.flexDirection = 'column';
 
-            const card = document.createElement('div');
-            card.className = 'card number';
-            card.textContent = data;
+            // Create a card for the number
+            const numberCard = createNumberCard(data);
+            numberCard.dataset.numberValue = data; // Store the raw data
+            numberCard.style.padding = '0px';
+            numberCard.style.margin = '0px';
 
+            // Create a card for the delete button
+            const deleteCard = document.createElement('div');
+            deleteCard.className = 'card delete-card'; // Added class for styling
+            deleteCard.style.width = 'auto'; // Adjust to content
+            deleteCard.style.padding = '0px';
+            deleteCard.style.margin = '0px';
+                 deleteCard.style.padding = '5px';
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-btn';
             deleteBtn.textContent = '×';
             deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 cardContainer.remove();
-                saveCards(); // Save cards after deletion
+                saveCards();
             });
+            deleteCard.appendChild(deleteBtn);
+            const numberDeleteContainer = document.createElement('div');
+            numberDeleteContainer.style.display = 'flex'; // Use flex to align items horizontally
+            numberDeleteContainer.appendChild(numberCard);
+            numberDeleteContainer.appendChild(deleteCard);
 
             const commentInput = document.createElement('input');
             commentInput.className = 'comment-input';
             commentInput.placeholder = 'Комментарий';
-            commentInput.value = commentText; // Set the comment text
+            commentInput.value = commentText;
 
-            commentInput.addEventListener('input', saveCards); // Save cards on comment change
+            commentInput.addEventListener('input', saveCards);
 
-            card.addEventListener('click', () => {
-                appendNumber(data);
-            });
-
-            card.appendChild(deleteBtn);
-            cardContainer.appendChild(card);
+            cardContainer.appendChild(numberDeleteContainer);
             cardContainer.appendChild(commentInput);
             dropContainer.appendChild(cardContainer);
         }
@@ -515,12 +650,25 @@
             e.preventDefault();
         });
 
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const data = e.dataTransfer.getData('text/plain');
+            if (!e.target.closest('.drop-container')) {
+                navigator.clipboard.writeText(data);
+            }
+
+        });
+
         dropContainer.addEventListener('drop', (e) => {
             e.preventDefault();
             const data = e.dataTransfer.getData('text/plain');
             if (!isNaN(data) || data === '.') {
                 createCard(data);
-                saveCards(); // Save cards after adding new card
+                saveCards();
             }
         });
 
@@ -528,6 +676,21 @@
             e.preventDefault();
             appendOperator('()');
         });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Enter") {
+                if (event.target.classList.contains("comment-input")) {
+                    event.preventDefault();
+                }
+            }
+        });
+   function getRawNumber(expression) {
+            return expression.replace(/,/g, '');
+        }
+
+        function getNumberForCalculation() {
+            return parseFloat(getRawNumber(currentExpression));
+        }
 
         function getVatRate() {
             let vatRate = document.getElementById('vatRate').value;
@@ -543,7 +706,8 @@
             let vatRate = getVatRate();
             if (vatRate === null) return;
 
-            let number = parseFloat(currentExpression);
+            let number = getNumberForCalculation();
+
             if (isNaN(number)) {
                 alert("Введите число для начисления НДС.");
                 return;
@@ -552,7 +716,7 @@
             let vatAmount = number * vatRate;
             let total = number + vatAmount;
 
-            addToHistory(`${number.toFixed(2)}, ${vatRate * 100}%, ${vatAmount.toFixed(2)}, ${total.toFixed(2)}`);
+            addToHistory(`${formatNumber(number.toFixed(2))}, ${vatRate * 100}%, ${formatNumber(vatAmount.toFixed(2))}, ${formatNumber(total.toFixed(2))}`);
 
             currentExpression = '';
             updateCurrentDisplay();
@@ -563,7 +727,8 @@
             let vatRate = getVatRate();
             if (vatRate === null) return;
 
-            let number = parseFloat(currentExpression);
+            let number = getNumberForCalculation();
+
             if (isNaN(number)) {
                 alert("Введите число для выделения НДС.");
                 return;
@@ -572,7 +737,7 @@
             let base = number / (1 + vatRate);
             let vatAmount = number - base;
 
-            addToHistory(`${base.toFixed(2)}, ${vatRate * 100}%, ${vatAmount.toFixed(2)}, ${number.toFixed(2)}`);
+            addToHistory(`${formatNumber(base.toFixed(2))}, ${vatRate * 100}%, ${formatNumber(vatAmount.toFixed(2))}, ${formatNumber(number.toFixed(2))}`);
 
             currentExpression = '';
             updateCurrentDisplay();
@@ -583,7 +748,8 @@
             let vatRate = getVatRate();
             if (vatRate === null) return;
 
-            let vatAmount = parseFloat(currentExpression);
+            let vatAmount = getNumberForCalculation();
+
             if (isNaN(vatAmount)) {
                 alert("Введите сумму НДС.");
                 return;
@@ -592,36 +758,39 @@
             let base = vatAmount / vatRate;
             let total = base + vatAmount;
 
-            addToHistory(`${base.toFixed(2)}, ${vatRate * 100}%, ${vatAmount.toFixed(2)}, ${total.toFixed(2)}`);
+            addToHistory(`${formatNumber(base.toFixed(2))}, ${vatRate * 100}%, ${formatNumber(vatAmount.toFixed(2))}, ${formatNumber(total.toFixed(2))}`);
             currentExpression = '';
             updateCurrentDisplay();
             isNewExpression = true;
         }
+
         function calculateAverage() {
-            if (currentExpression.includes('|')) {
-                let numbers = currentExpression.split('|').map(Number);
-                if (numbers.every(Number.isFinite)) {
-                    let sum = numbers.reduce((acc, val) => acc + val, 0);
-                    let average = sum / numbers.length;
-                    addToHistory(`${currentExpression} = ${average.toFixed(2)}`);
-                } else {
-                    alert("Некорректный ввод. Введите числа, разделенные '|'.");
-                }
+            let numbers = currentExpression.split('|').map(numStr => {
+                // Remove thousand separators and convert to Number
+                return parseFloat(numStr.replace(/,/g, ''));
+            });
+            if (numbers.every(Number.isFinite)) {
+                let sum = numbers.reduce((acc, val) => acc + val, 0);
+                let average = sum / numbers.length;
+                addToHistory(`${currentExpression} = ${average.toFixed(2)}`);
             } else {
-                alert("Используйте '|' для разделения чисел.");
+                alert("Некорректный ввод. Введите числа, разделенные '|'.");
             }
             currentExpression = '';
             updateCurrentDisplay();
             isNewExpression = true;
         }
-
-        // Load saved cards on page load
-        window.onload = loadSavedCards;
-
-        // Save cards before unload (optional, for better user experience)
-        window.addEventListener('beforeunload', saveCards);
     </script>
-
+    <script>
+            // const { remote } = require('electron');
+            // const { BrowserWindow } = remote;
+    const closeButton = document.getElementById('close-button');
+         //   const win = BrowserWindow.getFocusedWindow();
+          closeButton.addEventListener('click', () => {
+          const win = window.closest();
+                 win.close();
+            });
+    </script>
 </body>
 
 </html>
